@@ -6,6 +6,9 @@ This file is created to check boot drives to see if
 they are mounted at boot using the file /etc/fstab 
 '''
 
+
+# Documentation W.I.P 
+
 import sys
 
 def check_fstab():
