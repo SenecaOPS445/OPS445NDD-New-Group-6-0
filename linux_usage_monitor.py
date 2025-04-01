@@ -1,83 +1,73 @@
-import os
-import time
-import platform
+#!/usr/bin/env python3
 
+'''
+Author : Rajkumar Nagarasa
+
+Description : This python script is a linux system usage monitor tha provide real-time
+              information about a system resource usage
+'''
+
+
+import psutil           # For system and process utilities (CPU, memory)
+import platform         # To get OS information
+import shutil           # To get disk usage info
+import time             # To create delay in the loop
+
+# Function to get CPU usage percentage
 def get_cpu_usage():
-    with open("/proc/stat", "r") as f:
-        first_line = f.readline()
-    cpu_times = list(map(int, first_line.strip().split()[1:]))
-    idle_time = cpu_times[3]
-    total_time = sum(cpu_times)
+    return psutil.cpu_percent(interval=1)  # Measure CPU usage over a 1-second interval
 
-    time.sleep(1)
-
-    with open("/proc/stat", "r") as f:
-        second_line = f.readline()
-    cpu_times_2 = list(map(int, second_line.strip().split()[1:]))
-    idle_time_2 = cpu_times_2[3]
-    total_time_2 = sum(cpu_times_2)
-
-    idle_delta = idle_time_2 - idle_time
-    total_delta = total_time_2 - total_time
-
-    cpu_usage = 100 * (1.0 - (idle_delta / total_delta))
-    return round(cpu_usage, 2)
-
+# Function to get memory usage details
 def get_memory_usage():
-    meminfo = {}
-    with open("/proc/meminfo", "r") as f:
-        for line in f:
-            parts = line.split(":")
-            key = parts[0]
-            value = int(parts[1].strip().split()[0])
-            meminfo[key] = value
+    mem = psutil.virtual_memory()  # Get virtual memory info
+    return {
+        "total": mem.total,        # Total RAM
+        "used": mem.used,          # Used RAM
+        "percentage": mem.percent  # Memory usage percentage
+    }
 
-    total = meminfo["MemTotal"]
-    free = meminfo["MemFree"] + meminfo["Buffers"] + meminfo["Cached"]
-    used = total - free
-    percentage = (used / total) * 100
-
-    return total, used, round(percentage, 2)
-
+# Function to get disk usage details
 def get_disk_usage():
-    stat = os.statvfs('/')
-    total = (stat.f_blocks * stat.f_frsize) / (1024 ** 3)
-    free = (stat.f_bfree * stat.f_frsize) / (1024 ** 3)
-    used = total - free
-    percentage = (used / total) * 100
-    return round(total, 2), round(used, 2), round(percentage, 2)
+    disk = shutil.disk_usage("/")  # Get disk usage for root directory
+    return {
+        "total": disk.total,       # Total disk size
+        "used": disk.used,         # Disk space used
+        "free": disk.free,         # Free disk space
+        "percentage": (disk.used / disk.total) * 100  # Calculate used percentage manually
+    }
 
+# Function to get network usage (total bytes sent and received)
 def get_network_usage():
-    with open("/proc/net/dev", "r") as f:
-        lines = f.readlines()[2:]
+    net_io = psutil.net_io_counters()  # Get network I/O statistics
+    return {
+        "bytes_sent": net_io.bytes_sent,   # Total bytes sent since boot
+        "bytes_recv": net_io.bytes_recv    # Total bytes received since boot
+    }
 
-    total_recv = 0
-    total_sent = 0
-
-    for line in lines:
-        parts = line.strip().split()
-        recv = int(parts[1])
-        sent = int(parts[9])
-        total_recv += recv
-        total_sent += sent
-
-    return round(total_sent / (1024 ** 2), 2), round(total_recv / (1024 ** 2), 2)
-
+# Function to print system usage in a readable format
 def print_usage():
-    print("\n=== Linux System Usage Monitor ===")
-    print("System: {} {}".format(platform.system(), platform.release()))
-    print("CPU Usage: {}%".format(get_cpu_usage()))
+    # Print OS info
+    print(f"System: {platform.system()} {platform.release()}")  
+    
+    # Print CPU usage
+    print(f"CPU Usage: {get_cpu_usage()}%")
 
-    total_mem, used_mem, mem_percent = get_memory_usage()
-    print("Memory Usage: {:.2f} MB / {:.2f} MB ({:.2f}%)".format(used_mem / 1024, total_mem / 1024, mem_percent))
+    # Get and print memory usage
+    mem = get_memory_usage()
+    print(f"Memory Usage: {mem['used'] / (1024 ** 3):.2f} GB / {mem['total'] / (1024 ** 3):.2f} GB ({mem['percentage']}%)")
 
-    total_disk, used_disk, disk_percent = get_disk_usage()
-    print("Disk Usage: {:.2f} GB / {:.2f} GB ({:.2f}%)".format(used_disk, total_disk, disk_percent))
+    # Get and print disk usage
+    disk = get_disk_usage()
+    print(f"Disk Usage: {disk['used'] / (1024 ** 3):.2f} GB / {disk['total'] / (1024 ** 3):.2f} GB ({disk['percentage']:.2f}%)")
 
-    sent, recv = get_network_usage()
-    print("Network - Sent: {:.2f} MB | Received: {:.2f} MB".format(sent, recv))
+    # Get and print network usage
+    net = get_network_usage()
+    print(f"Network - Sent: {net['bytes_sent'] / (1024 ** 2):.2f} MB | Received: {net['bytes_recv'] / (1024 ** 2):.2f} MB")
 
+# Entry point of the script
 if __name__ == "__main__":
+    # Run the usage monitor in a loop every 5 seconds
     while True:
-        print_usage()
-        time.sleep(5)
+        print("\n=== Linux System Usage ===")  
+        print_usage()                         
+        time.sleep(5)                         # Wait for 5 seconds before repeating
