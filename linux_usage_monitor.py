@@ -7,67 +7,58 @@ Description : This python script is a linux system usage monitor tha provide rea
               information about a system resource usage
 '''
 
+import os       # To run system commands
+import platform # To get OS info
+import shutil   # For disk usage
+import time     # For delays
 
-import psutil           # For system and process utilities (CPU, memory)
-import platform         # To get OS information
-import shutil           # To get disk usage info
-import time             # To create delay in the loop
-
-# Function to get CPU usage percentage
+# Get CPU usage using 'top' command (Linux only)
 def get_cpu_usage():
-    return psutil.cpu_percent(interval=1)  # Measure CPU usage over a 1-second interval
+    output = os.popen("top -bn1 | grep 'Cpu(s)'").read()
+    return output.strip()
 
-# Function to get memory usage details
+# Get memory usage using 'free' command
 def get_memory_usage():
-    mem = psutil.virtual_memory()  # Get virtual memory info
-    return {
-        "total": mem.total,        # Total RAM
-        "used": mem.used,          # Used RAM
-        "percentage": mem.percent  # Memory usage percentage
-    }
+    output = os.popen("free -h").read()
+    return output.strip()
 
-# Function to get disk usage details
+# Get disk usage using shutil (built-in)
 def get_disk_usage():
-    disk = shutil.disk_usage("/")  # Get disk usage for root directory
+    total, used, free = shutil.disk_usage("/")
     return {
-        "total": disk.total,       # Total disk size
-        "used": disk.used,         # Disk space used
-        "free": disk.free,         # Free disk space
-        "percentage": (disk.used / disk.total) * 100  # Calculate used percentage manually
+        "total": total,
+        "used": used,
+        "free": free
     }
 
-# Function to get network usage (total bytes sent and received)
+# Get network usage using 'ip -s link' command
 def get_network_usage():
-    net_io = psutil.net_io_counters()  # Get network I/O statistics
-    return {
-        "bytes_sent": net_io.bytes_sent,   # Total bytes sent since boot
-        "bytes_recv": net_io.bytes_recv    # Total bytes received since boot
-    }
+    output = os.popen("ip -s link").read()
+    return output.strip()
 
-# Function to print system usage in a readable format
+# Print system usage information
 def print_usage():
-    # Print OS info
-    print(f"System: {platform.system()} {platform.release()}")  
+    print("System: " + platform.system() + " " + platform.release())
     
-    # Print CPU usage
-    print(f"CPU Usage: {get_cpu_usage()}%")
+    print("\n  CPU Usage ")
+    print(get_cpu_usage())
 
-    # Get and print memory usage
-    mem = get_memory_usage()
-    print(f"Memory Usage: {mem['used'] / (1024 ** 3):.2f} GB / {mem['total'] / (1024 ** 3):.2f} GB ({mem['percentage']}%)")
+    print("\n Memory Usage ")
+    print(get_memory_usage())
 
-    # Get and print disk usage
+    print("\n Disk Usage ")
     disk = get_disk_usage()
-    print(f"Disk Usage: {disk['used'] / (1024 ** 3):.2f} GB / {disk['total'] / (1024 ** 3):.2f} GB ({disk['percentage']:.2f}%)")
+    used_gb = disk["used"] // (1024 ** 3)
+    total_gb = disk["total"] // (1024 ** 3)
+    print("Used: {} GB / Total: {} GB".format(used_gb, total_gb))
 
-    # Get and print network usage
-    net = get_network_usage()
-    print(f"Network - Sent: {net['bytes_sent'] / (1024 ** 2):.2f} MB | Received: {net['bytes_recv'] / (1024 ** 2):.2f} MB")
+    print("\n Network Usage ")
+    print(get_network_usage())
 
-# Entry point of the script
+# Run the monitor loop
 if __name__ == "__main__":
-    # Run the usage monitor in a loop every 5 seconds
     while True:
-        print("\n=== Linux System Usage ===")  
-        print_usage()                         
-        time.sleep(5)                         # Wait for 5 seconds before repeating
+        print("\n=== Linux System Usage Monitor ===")
+        print_usage()
+        time.sleep(5)
+
