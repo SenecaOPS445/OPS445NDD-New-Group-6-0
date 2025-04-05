@@ -3,62 +3,40 @@
 '''
 Author : Rajkumar Nagarasa
 
-Description : This python script is a linux system usage monitor tha provide real-time
-              information about a system resource usage
+Description : This python script retrieves and displays disk usage information 
+              for all mounted filesystems on a Linux machine.
 '''
 
-import os       # To run system commands
-import platform # To get OS info
-import shutil   # For disk usage
-import time     # For delays
+import subprocess  
 
-# Get CPU usage using 'top' command (Linux only)
-def get_cpu_usage():
-    output = os.popen("top -bn1 | grep 'Cpu(s)'").read()
-    return output.strip()
+# Function to show disk usage
+# Run the 'df -h' command to get disk usage 
+def show_disk_usage():
+    try:
+        
+        output = subprocess.run(
+            ["df", "-h"],              
+            capture_output=True,       
+            text=True,                 
+            check=True                 
+        ).stdout  # Get the standard output from the command
 
-# Get memory usage using 'free' command
-def get_memory_usage():
-    output = os.popen("free -h").read()
-    return output.strip()
+        print("\nDisk Usage:")
 
-# Get disk usage using shutil (built-in)
-def get_disk_usage():
-    total, used, free = shutil.disk_usage("/")
-    return {
-        "total": total,
-        "used": used,
-        "free": free
-    }
+        # Print the full 'df -h' output
+        print(output)
 
-# Get network usage using 'ip -s link' command
-def get_network_usage():
-    output = os.popen("ip -s link").read()
-    return output.strip()
+    except subprocess.CalledProcessError:
+        # If 'df' fails to run or exits with an error code
+        print("Error: Could not retrieve disk usage using df.")
+    except FileNotFoundError:
+        # If the 'df' command is not available (very rare on Linux)
+        print("Error: 'df' command not found on this system.")
 
-# Print system usage information
-def print_usage():
-    print("System: " + platform.system() + " " + platform.release())
-    
-    print("\n  CPU Usage ")
-    print(get_cpu_usage())
+# Main function to run the program
+def main():
+    show_disk_usage()
 
-    print("\n Memory Usage ")
-    print(get_memory_usage())
 
-    print("\n Disk Usage ")
-    disk = get_disk_usage()
-    used_gb = disk["used"] // (1024 ** 3)
-    total_gb = disk["total"] // (1024 ** 3)
-    print("Used: {} GB / Total: {} GB".format(used_gb, total_gb))
-
-    print("\n Network Usage ")
-    print(get_network_usage())
-
-# Run the monitor loop
 if __name__ == "__main__":
-    while True:
-        print("\n=== Linux System Usage Monitor ===")
-        print_usage()
-        time.sleep(5)
-
+    main()
