@@ -16,7 +16,7 @@ def list_drives():
     # Run the lsblk command to gather lists of device names
     try:
         lsblk_output = subprocess.run( #Execute command in a list
-            ["lsblk", "-l", "-o", "NAME"], #Run system with list option & specify that only name should be output
+            ["lsblk", "-l", "-o", "NAME,SIZE,TYPE,MOUNTPOINT"], #Run system with list option & specify that only name should be output
             capture_output=True, # Capture standard output and error
             text=True, # Convert output to sting
             check=True 
@@ -34,17 +34,12 @@ def list_drives():
     
 
     # Header for the list of physical drives
-    print('\nPhysical Drives:')
-    print('-' * 20) # Header divider
+    print('\nPhysical Drives and Partitions')
+    print('-' * 30) # Header divider
 
-    # Skip header line
-    for line in lsblk_output[1:]: 
-        # If line not empty after stripping whitespace, process
-        if line.strip():
-            # Adding "/dev/" for device path name
-            device = f"/dev/{line.strip()}"
-            # Print the device path in a formatted string
-            print(f"Device: {device}")
+    # Iterate each line in lslk output and print it, showing raw device info
+    for line in lsblk_output:
+        print(line)
 
 def main():
     list_drives()
