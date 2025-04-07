@@ -124,6 +124,7 @@ def generate_report(output_file=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a system report.")
+    # output file
     parser.add_argument("-o", "--output", help="Output file for the report.")
     args = parser.parse_args()
 
