@@ -19,7 +19,7 @@ This report can be generated in 2 formats:
 - **Text File Output**
 
 ```
-Usage: ./Assignment2Testing.py [-a or --all] [-u or --usage] [-l or --list] [-m or --mount] [-r or --report] 
+Usage: ./Assignment2.py [-a or --all] [-u or --usage] [-l or --list] [-m or --mount] [-r or --report] 
 
 Generate a system report or view individual sections.
 
