@@ -12,6 +12,7 @@ Changes from the original scripts: Removed print statements and returning string
 
 import argparse
 import subprocess
+import datetime
 
 # Function to show disk usage
 # Run the 'df -h' command to get disk usage 
@@ -92,7 +93,19 @@ def check_fstab():
         return f"Error retrieving mount points: {e}"
 
 def generate_report(output_file=None):
+
+    '''
+    Author: Edison Leung
+    '''
     """Generates the system report."""
+
+    # Gets the current time and date
+    now = datetime.datetime.now()
+    current_time = f"{now.year}-{now.month:02}-{now.day:02}_{now.hour:02}:{now.minute:02}:{now.second:02}"
+
+    # Implements the current date and time into the file
+    if output_file is None:
+        output_file = f"Disk_Report_{current_time}.txt"
 
     # Initializes report with header
     report = "    Disk Report    \n\n"
@@ -123,11 +136,60 @@ def generate_report(output_file=None):
         print(report)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate a system report.")
-    # output file
-    parser.add_argument("-o", "--output", help="Output file for the report.")
+
+    # Implement argparse to add short cut arguments to request certain tasks.
+    parser = argparse.ArgumentParser(
+        description="Generate a system report or view individual sections.", 
+        usage="./Assignment2Testing.py [-a or --all] [-u or --usage] [-l or --list] [-m or --mounts] [-r or --report] ")
+    
+    # Check usage using  -u
+    parser.add_argument("-u", "--usage", action="store_true", help="Show disk usage (df -h).")
+    #Lists physical drives and partitions
+    parser.add_argument("-l", "--list", action="store_true", help="List physical drives and partitions.")
+    # Show mountpoints
+    parser.add_argument("-m", "--mount", action="store_true", help="Show mountpoints from /etc/fstab assioted with boot")
+    #generate full report
+    parser.add_argument("-a", "--all", action="store_true", help="Generate a full system report without creating a file.") 
+    # generate report and make a file
+    parser.add_argument("-r", "--report", action="store_true", help="Generate a full system report and creates a file in the same directory.")
+
+    # Shortens added arguments 
     args = parser.parse_args()
 
-    generate_report(args.output)
+    if args.usage:
+    # if argument -u or -usage is used, it will show just disk usage. 
+        print("\n--- Disk Usage ---")
+        print(show_disk_usage())    
+
+    elif args.list:
+    # if argument -l or --list is used, it will list current physical drives and partitions.
+        print("\n--- Drives and Partitions ---")
+        print(list_drives())
+    
+    elif args.mount:
+    # if argument -m or --mount is used, it will show currently mounted filesystems that start on boot usage. 
+        print("\n--- Mount Points (fstab) ---")
+        print(check_fstab())
+
+    elif args.all:
+    # if argument -a or --all is used, it will show a full report without creating a file. 
+        print("\n----- Full Report -----\n\n")
+        print("\n--- Disk Usage ---")
+        print(show_disk_usage())
+        print("\n--- Drives and Partitions ---")
+        print(list_drives())
+        print("\n--- Mount Points (fstab) ---")
+        print(check_fstab())
+
+    
+    elif args.report:
+    # if argument -r or --report is used, it will create a report in your current file directory.
+        generate_report()
+
+    
+    else:
+    # If no argument is used, parser will display a usage error message and what the arguments do.
+        parser.print_help()
+   
 
 
