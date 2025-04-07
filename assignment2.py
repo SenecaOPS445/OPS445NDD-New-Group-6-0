@@ -142,7 +142,7 @@ if __name__ == "__main__":
     # Implement argparse to add short cut arguments to request certain tasks.
     parser = argparse.ArgumentParser(
         description="Generate a system report or view individual sections.", 
-        usage="./Assignment2Testing.py [-a or --all] [-u or --usage] [-l or --list] [-m or --mounts] [-r or --report] ")
+        usage="./assignment2.py [-a or --all] [-u or --usage] [-l or --list] [-m or --mounts] [-r or --report] ")
     
     # Check usage using  -u
     parser.add_argument("-u", "--usage", action="store_true", help="Show disk usage (df -h).")
