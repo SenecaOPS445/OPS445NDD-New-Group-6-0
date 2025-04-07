@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 '''
-Author: Edison Leung
+Author: Group 6 NDD - Andy Persaud Cheteram, Rajkumar Nagarasa, Edison Leung & Ian Serquinaa
 
 Description: This script generates a system report by integrating the functionality of
              linux_usage_monitor.py, List_Drives.py, and MountChecker.py.
 '''
 
 '''
-Changes from the original scripts: Removed print statements and returning strings instead, allowing generate_report function to control the output and integrate it into the report. Simplified error handling from original scripts. Except blocks now return strings instead of prints to be included in report.
+Changes from the original scripts: Removed print statements and returning strings instead, 
+allowing generate_report function to control the output and integrate it into the report. 
+Simplified error handling from original scripts. Except blocks now return strings instead of prints to be included in report.
 '''
-
 import argparse
 import subprocess
 import datetime
@@ -39,7 +40,7 @@ def list_drives():
     '''
     Author: Ian Serquinaa
 
-    This file purpose is to list all physical drives and partitions
+    Description: This file purpose is to list all physical drives and partitions
     on a linux system.It execudetes the lsblk command to retrieve the device names
     then formats and prints them as device paths. /dev/sda
     '''
@@ -65,8 +66,7 @@ def check_fstab():
     '''
     Author: Andy Persaud Cheteram
 
-    This file is created to check boot drives to see if 
-    they are mounted at boot using the file /etc/fstab 
+    Description: In this script, attached disk (storage) devices are read and checked to see if there mountpoint is boot.
     '''
     try:
         '''Changed from original to ensure that ensures that the file is automatically closed when
@@ -86,14 +86,15 @@ def check_fstab():
                 # Make sure the line has at least two parts (the drive and its mount point).
    
                 if len(parts) >= 2:
-                    mount_points.append(f"{parts[0]} mounted -> {parts[1]} at boot")
+                    mount_points.append(f"{parts[0]} is mounted to {parts[1]}.")
         # returns a string with each mount point on a new line, otherwise states no points found
         return "\n".join(mount_points) if mount_points else "No mount points found."
     except (FileNotFoundError, PermissionError) as e:
         return f"Error retrieving mount points: {e}"
 
-def generate_report(output_file=None):
 
+def generate_report(output_file=None):
+    
     '''
     Author: Edison Leung
     '''
@@ -128,6 +129,7 @@ def generate_report(output_file=None):
             with open(output_file, 'w') as f:
                 f.write(report)
             print(f"Report saved to {output_file}") # Inform the user that the report was saved.
+            
         except Exception as e:
             # Handle any exceptions that occur during file writing.
             print(f"Error saving report: {e}")
@@ -191,5 +193,4 @@ if __name__ == "__main__":
     # If no argument is used, parser will display a usage error message and what the arguments do.
         parser.print_help()
    
-
 
