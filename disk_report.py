@@ -94,6 +94,9 @@ def check_fstab():
 def generate_report(output_file=None):
     """Generates the system report."""
 
+    # Initializes report with header
+    report = "    Disk Report    \n\n"
+
     # Add Disk Usage section to the report.
     report += "--- Disk Usage ---\n"
     report += f"{show_disk_usage()}\n\n"
@@ -120,5 +123,10 @@ def generate_report(output_file=None):
         print(report)
 
 if __name__ == "__main__":
-...
+    parser = argparse.ArgumentParser(description="Generate a system report.")
+    parser.add_argument("-o", "--output", help="Output file for the report.")
+    args = parser.parse_args()
+
+    generate_report(args.output)
+
 
