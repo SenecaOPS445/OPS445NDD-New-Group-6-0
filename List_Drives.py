@@ -4,8 +4,7 @@
 Author: Ian Serquinaa
 
 This file purpose is to list all physical drives and partitions
-on a linux system.It execudetes the lsblk command to retrieve the device names
-then formats and prints them as device paths. /dev/sda
+
 '''
 
 # Import the subprocess module for this script to run shell commands
